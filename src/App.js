@@ -49,7 +49,7 @@ class App extends Component {
     })
   }
 
-  send = (message, period = false) => {
+  send = (message, stop = false) => {
     if (!message) {
       return
     }
@@ -58,9 +58,9 @@ class App extends Component {
         messages: [{
           message,
           type: 'own',
-          period
+          stop
         }].concat(this.state.messages),
-      }, () => connection.send({message: message, type: 'friend', period})
+      }, () => connection.send({message: message, type: 'friend', stop})
     )
   }
 
@@ -108,7 +108,7 @@ class App extends Component {
                 width: '50%',
                 marginLeft: '25%',
                 textAlign: m.type === 'friend' ? 'left' : 'right',
-                textDecoration: m.period ? 'underline' : 'none'
+                textDecoration: m.stop ? 'underline' : 'none'
               }}>{m.message}</div>)}
           </div>
           }
