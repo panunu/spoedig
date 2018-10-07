@@ -14,6 +14,7 @@ class App extends Component {
     peerId: '',
     isReady: false,
     message: '',
+    lastMessage: '',
     messages: []
   }
 
@@ -48,14 +49,27 @@ class App extends Component {
     })
   }
 
-  send = (message) => {
+  send = (message, period = false) => {
+    if (!message) {
+      return
+    }
+
     this.setState({
         messages: [{
           message,
-          type: 'own'
+          type: 'own',
+          period
         }].concat(this.state.messages),
-      }, () => connection.send({message: message, type: 'friend'})
+      }, () => connection.send({message: message, type: 'friend', period})
     )
+  }
+
+  onEnter = e => {
+    if (e.key === 'Enter') {
+      this.send(this.state.message, true)
+
+      this.setState({lastMessage: '', message: ''})
+    }
   }
 
   typo = e => {
@@ -63,19 +77,19 @@ class App extends Component {
       if (/\s/.test(this.state.message)) {
         this.send(this.state.message)
 
-        this.setState({message: ''})
+        this.setState({lastMessage: this.state.message, message: ''})
       }
     })
   }
 
   render() {
-    const {peerType, isReady, peerId, messages, message} = this.state
+    const {peerType, isReady, peerId, messages, message, lastMessage} = this.state
 
     return (
       <div className="App">
         <header className="App-header">
-          {isReady && <input type="text" value={message} onChange={this.typo}
-                             style={{position: 'absolute', bottom: 0, left: 0, right: 0, width: '100%', height: 50}}/>}
+          {isReady && <input type="text" value={message} onChange={this.typo} placeholder={lastMessage} onKeyPress={this.onEnter}
+                             style={{position: 'absolute', bottom: 0, left: 0, right: 0, width: '100%', height: 50, textAlign: 'center', fontSize: 16}}/>}
 
           {isReady &&
           <div style={{
@@ -93,7 +107,8 @@ class App extends Component {
               style={{
                 width: '50%',
                 marginLeft: '25%',
-                textAlign: m.type === 'friend' ? 'left' : 'right'
+                textAlign: m.type === 'friend' ? 'left' : 'right',
+                textDecoration: m.period ? 'underline' : 'none'
               }}>{m.message}</div>)}
           </div>
           }
